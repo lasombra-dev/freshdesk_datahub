@@ -10,7 +10,8 @@ START_DATE = "2025-10-14"  # Fecha inicial para la población (14/OCT/2025)
 
 # Conexión a la base de datos SQL
 conn = pyodbc.connect(
-    "DRIVER={SQL Server};"
+    #"DRIVER={SQL Server};"
+    "DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
     "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
     "UID=sysdev;"

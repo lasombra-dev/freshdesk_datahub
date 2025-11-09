@@ -1,0 +1,88 @@
+import requests
+import pyodbc
+
+# Configuración de Freshdesk
+FRESHDESK_DOMAIN = "grupoempack.freshdesk.com"  # Cambia esto por tu dominio
+API_KEY = "NcWk2UUwZSPC6WCWn3VZ"
+HEADERS = {
+    "Content-Type": "application/json"
+}
+
+# Conexión a la base de datos SQL
+conn = pyodbc.connect(
+    #"DRIVER={SQL Server};"
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
+    "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
+    "UID=sysdev;"
+    "PWD=Lg9oAnCywBmKNh;"
+)
+cursor = conn.cursor()
+
+# Función para obtener conversaciones de un ticket específico
+def obtener_conversaciones(ticket_id):
+    conversaciones = []
+    page = 1
+
+    while True:
+        response = requests.get(
+            f"https://{FRESHDESK_DOMAIN}/api/v2/tickets/{ticket_id}/conversations?page={page}",
+            auth=(API_KEY, "X"),
+            headers=HEADERS
+        )
+
+        if response.status_code != 200:
+            print(f"Error al consultar la API para el ticket {ticket_id}: {response.status_code}")
+            break
+
+        data = response.json()
+        if not data:
+            break  # No hay más conversaciones
+
+        conversaciones.extend(data)
+        page += 1
+
+    return conversaciones
+
+# Función para poblar la tabla Conversations
+def poblar_conversaciones(ticket_id, conversaciones):
+    for conversacion in conversaciones:
+        id_conversacion = conversacion.get("id")
+        user_id = conversacion.get("user_id")
+        body = conversacion.get("body_text", "Sin Contenido")
+        creado = conversacion.get("created_at")
+
+        try:
+            cursor.execute("""
+                MERGE Conversations AS target
+                USING (SELECT ? AS ID, ? AS TicketID, ? AS UserID, ? AS Body, ? AS CreatedAt) AS source
+                ON target.ID = source.ID
+                WHEN MATCHED THEN
+                    UPDATE SET TicketID = source.TicketID,
+                               UserID = source.UserID,
+                               Body = source.Body,
+                               CreatedAt = source.CreatedAt
+                WHEN NOT MATCHED THEN
+                    INSERT (ID, TicketID, UserID, Body, CreatedAt)
+                    VALUES (source.ID, source.TicketID, source.UserID, source.Body, source.CreatedAt);
+            """, id_conversacion, ticket_id, user_id, body, creado)
+        except Exception as e:
+            print(f"Error al insertar la conversación {id_conversacion}: {e}")
+
+    conn.commit()
+
+if __name__ == "__main__":
+    print("Extrayendo conversaciones de los tickets...")
+
+    # Obtener lista de tickets desde la tabla Tickets
+    cursor.execute("SELECT ID FROM Tickets")
+    tickets = cursor.fetchall()
+
+    for ticket in tickets:
+        ticket_id = ticket[0]
+        print(f"Procesando conversaciones del ticket {ticket_id}...")
+        conversaciones = obtener_conversaciones(ticket_id)
+        poblar_conversaciones(ticket_id, conversaciones)
+
+    print("¡Tabla de conversaciones actualizada con éxito!")
+    conn.close()
