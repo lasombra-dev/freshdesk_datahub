@@ -1,49 +1,69 @@
 -- Tabla de Contactos
 CREATE TABLE Contactos (
-    ID BIGINT PRIMARY KEY,                -- ID ˙nico del contacto
+    ID BIGINT PRIMARY KEY,                -- ID √∫nico del contacto
     NombreCompleto NVARCHAR(100),         -- Nombre completo del contacto
     Correo NVARCHAR(100)                  -- Correo del contacto
 );
 
 -- Tabla de Empresas
 CREATE TABLE Empresas (
-    ID BIGINT PRIMARY KEY,                -- ID ˙nico de la empresa
+    ID BIGINT PRIMARY KEY,                -- ID √∫nico de la empresa
     NombreEmpresa NVARCHAR(100)           -- Nombre de la empresa
 );
 
--- Tabla de SincronizaciÛn
+-- Tabla de Sincronizaci√≥n
 CREATE TABLE Sincronizacion (
     EntityFreshdesk NVARCHAR(50) PRIMARY KEY,   -- Nombre de la entidad sincronizada (ej. "tickets", "contactos", etc.)
-    LastUpdate DATETIME                          -- ⁄ltima fecha de sincronizaciÛn
+    LastUpdate DATETIME                          -- √öltima fecha de sincronizaci√≥n
 );
 
 -- Tabla de Agentes
 CREATE TABLE Agentes (
-    ID BIGINT PRIMARY KEY,                -- ID ˙nico del agente
+    ID BIGINT PRIMARY KEY,                -- ID √∫nico del agente
     Nombre NVARCHAR(100),                 -- Nombre completo del agente
-    Correo NVARCHAR(100),                 -- Correo electrÛnico del agente
+    Correo NVARCHAR(100)                  -- Correo electr√≥nico del agente
 );
 
 -- Tabla de Tickets
 CREATE TABLE Tickets (
-    ID BIGINT PRIMARY KEY,                -- ID ˙nico del ticket
+    ID BIGINT PRIMARY KEY,                -- ID √∫nico del ticket
     Asunto NVARCHAR(255),                 -- Asunto del ticket
     Estado NVARCHAR(50),                  -- Estado del ticket
     Prioridad NVARCHAR(50),               -- Prioridad del ticket
     Tipo NVARCHAR(50),                    -- Tipo del ticket
     Subtipo NVARCHAR(100),                -- Subtipo del ticket
-    Agente BIGINT,                        -- Agente asignado (clave for·nea)
-    TiempoCreacion DATETIME,              -- Fecha de creaciÛn del ticket
-    TiempoResolucion DATETIME,            -- Fecha lÌmite para resolver el ticket
-    RequesterID BIGINT,                   -- ID del contacto que creÛ el ticket (clave for·nea)
-    CompanyID BIGINT,                     -- ID de la empresa asociada al ticket (clave for·nea)
+    Agente BIGINT,                        -- Agente asignado (clave for√°nea)
+    TiempoCreacion DATETIME,              -- Fecha de creaci√≥n del ticket
+    TiempoResolucion DATETIME,            -- Fecha l√≠mite para resolver el ticket
+    RequesterID BIGINT,                   -- ID del contacto que cre√≥ el ticket (clave for√°nea)
+    CompanyID BIGINT,                     -- ID de la empresa asociada al ticket (clave for√°nea)
     Etiquetas NVARCHAR(255),              -- Etiquetas asociadas al ticket
-    FOREIGN KEY (RequesterID) REFERENCES Contactos(ID), -- RelaciÛn con Contactos
-    FOREIGN KEY (CompanyID) REFERENCES Empresas(ID),   -- RelaciÛn con Empresas
-    FOREIGN KEY (Agente) REFERENCES Agentes(ID)        -- RelaciÛn con Agentes
+    FOREIGN KEY (RequesterID) REFERENCES Contactos(ID), -- Relaci√≥n con Contactos
+    FOREIGN KEY (CompanyID) REFERENCES Empresas(ID),   -- Relaci√≥n con Empresas
+    FOREIGN KEY (Agente) REFERENCES Agentes(ID)        -- Relaci√≥n con Agentes
 );
 
+-- Tabla de Conversaciones
+CREATE TABLE Conversations (
+    ID BIGINT PRIMARY KEY,                  -- ID √∫nico de la conversaci√≥n
+    TicketID BIGINT,                        -- Relaci√≥n con el ticket
+    UserID BIGINT,                          -- ID del agente que respondi√≥
+    Body NVARCHAR(MAX),                     -- Contenido del mensaje
+    CreatedAt DATETIME,                     -- Hora de creaci√≥n de la conversaci√≥n
+    FOREIGN KEY (TicketID) REFERENCES Tickets(ID),  -- Relaci√≥n con Tickets
+    FOREIGN KEY (UserID) REFERENCES Agentes(ID)     -- Relaci√≥n con Agentes
+);
 
+-- Tabla de SLA Policies
+CREATE TABLE SLA_Policies (
+    ID BIGINT PRIMARY KEY,                  -- ID √∫nico de la pol√≠tica SLA
+    Nombre NVARCHAR(100),                   -- Nombre de la pol√≠tica
+    Prioridad NVARCHAR(50),                 -- Prioridad (priority_1, priority_2, etc.)
+    RespondWithin INT,                      -- Tiempo l√≠mite para responder (en minutos)
+    ResolveWithin INT                       -- Tiempo l√≠mite para resolver (en minutos)
+);
+
+-- Opcional: Ajustar restricciones para casos de carga masiva
 ALTER TABLE Agentes NOCHECK CONSTRAINT ALL;
 TRUNCATE TABLE Agentes;
 ALTER TABLE Agentes CHECK CONSTRAINT ALL;
