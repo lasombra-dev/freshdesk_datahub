@@ -1,17 +1,17 @@
 import requests
 import pyodbc
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Configuración de Freshdesk
 FRESHDESK_DOMAIN = "grupoempack.freshdesk.com"  # Cambia por tu dominio
 API_KEY = "NcWk2UUwZSPC6WCWn3VZ"  # Cambia por tu API Key
 HEADERS = {"Content-Type": "application/json"}
-START_DATE = "2025-10-14"  # Fecha inicial para la población (14/OCT/2025)
+START_DATE = "2025-10-14"  # Fecha inicial fija en formato ISO 8601 (UTC)
 
 # Conexión a la base de datos SQL
 conn = pyodbc.connect(
-    #"DRIVER={SQL Server};"
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={SQL Server};"
+    #"DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
     "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
     "UID=sysdev;"
@@ -23,26 +23,36 @@ cursor = conn.cursor()
 def obtener_tickets(fecha_inicio):
     tickets = []
     page = 1
-    per_page = 100  # Máximo permitido por Freshdesk
+
+    # Obtener la fecha actual en formato UTC
+    fecha_actual = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    print(f"Buscando tickets desde {fecha_inicio} hasta {fecha_actual}...")
 
     while True:
-        # Filtrar tickets por fecha de creación
-        query = f"created_at:>'{fecha_inicio}'"
-        response = requests.get(
-            f"https://{FRESHDESK_DOMAIN}/api/v2/search/tickets?query=\"{query}\"&page={page}",
-            auth=(API_KEY, "X"),
-            headers=HEADERS
-        )
+        # Construir la query con rango de fechas
+        query = f"created_at:>'{fecha_inicio}' AND created_at:<'{fecha_actual}'"
+        url = f"https://{FRESHDESK_DOMAIN}/api/v2/search/tickets?query=\"{query}\"&page={page}"
+        print(f"Consultando página {page}: {url}")
 
+        # Llamar a la API
+        response = requests.get(url, auth=(API_KEY, "X"), headers=HEADERS)
+
+        # Validar el código de respuesta
         if response.status_code != 200:
             print(f"Error al consultar la API: {response.status_code}")
             break
 
+        # Parsear los datos
         data = response.json().get("results", [])
         if not data:
-            break  # No hay más tickets
+            print("No hay más tickets disponibles.")
+            break  # Salir del loop si no hay más resultados
 
+        # Agregar los tickets a la lista
         tickets.extend(data)
+        print(f"Página {page} procesada: {len(data)} tickets encontrados.")
+
+        # Avanzar a la siguiente página
         page += 1
 
     return tickets
@@ -98,45 +108,15 @@ def poblar_tickets(tickets):
 
     conn.commit()
 
-# Función para obtener la última sincronización desde la tabla Sincronizacion
-def obtener_ultima_sincronizacion(entity_freshdesk):
-    cursor.execute("SELECT LastUpdate FROM Sincronizacion WHERE EntityFreshdesk = ?", entity_freshdesk)
-    resultado = cursor.fetchone()
-    return resultado[0] if resultado else None
-
-# Función para actualizar la última sincronización en la tabla Sincronizacion
-def actualizar_ultima_sincronizacion(entity_freshdesk, fecha):
-    cursor.execute("""
-        UPDATE Sincronizacion
-        SET LastUpdate = ?
-        WHERE EntityFreshdesk = ?
-    """, fecha, entity_freshdesk)
-    conn.commit()
-    print(f"Última sincronización de {entity_freshdesk} actualizada a: {fecha}")
-
 # Ejecutar todo el flujo
 if __name__ == "__main__":
-    # 1. Consulta la última sincronización
-    ultima_sincronizacion = obtener_ultima_sincronizacion("tickets")
-    if ultima_sincronizacion:
-        print(f"Última sincronización de tickets: {ultima_sincronizacion}")
-    else:
-        print("Nunca se ha sincronizado tickets antes. Sincronizando desde 14/OCT/2025...")
-        ultima_sincronizacion = START_DATE
+    # 1. Llama a la API de Freshdesk con la fecha inicial predefinida
+    print(f"Sincronizando tickets desde: {START_DATE}")
+    tickets = obtener_tickets(START_DATE)
 
-    # 2. Llama a la API de Freshdesk usando la última fecha
-    tickets = obtener_tickets(ultima_sincronizacion)
-
-    # 3. Inserta o actualiza los tickets en la base de datos
+    # 2. Inserta o actualiza los tickets en la base de datos
     print(f"Tickets obtenidos: {len(tickets)}")
     poblar_tickets(tickets)
-
-    # 4. Encuentra la fecha más reciente de los tickets sincronizados y actualiza la tabla Sincronizacion
-    if tickets:
-        ultima_fecha = max(ticket["updated_at"] for ticket in tickets)
-        actualizar_ultima_sincronizacion("tickets", ultima_fecha)
-    else:
-        print("No hay tickets nuevos o actualizados.")
 
     # Cierra la conexión
     conn.close()

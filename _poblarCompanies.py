@@ -13,8 +13,8 @@ ENDPOINT = f"https://{FRESHDESK_DOMAIN}/api/v2/companies"
 
 # Conexión a la base de datos SQL
 conn = pyodbc.connect(
-    #"DRIVER={SQL Server};"
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={SQL Server};"
+    #"DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
     "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
     "UID=sysdev;"

@@ -13,8 +13,8 @@ ENDPOINT = f"https://{FRESHDESK_DOMAIN}/api/v2/sla_policies"
 
 # Conexión a la base de datos SQL
 conn = pyodbc.connect(
-    #"DRIVER={SQL Server};"
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={SQL Server};"
+    #"DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
     "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
     "UID=sysdev;"
@@ -55,10 +55,10 @@ def poblar_sla_policies(sla_policies):
                     ON target.ID = source.ID AND target.Prioridad = source.Prioridad
                     WHEN MATCHED THEN
                         UPDATE SET Nombre = source.Nombre,
-                                   RespondWithin = source.RespondWithin,
-                                   ResolveWithin = source.ResolveWithin
+                                   TiempoRespuesta = source.RespondWithin,
+                                   TiempoResolucion = source.ResolveWithin
                     WHEN NOT MATCHED THEN
-                        INSERT (ID, Nombre, Prioridad, RespondWithin, ResolveWithin)
+                        INSERT (ID, Nombre, Prioridad, TiempoRespuesta, TiempoResolucion)
                         VALUES (source.ID, source.Nombre, source.Prioridad, source.RespondWithin, source.ResolveWithin);
                 """, id_policy, nombre, prioridad, respond_within, resolve_within)
             except Exception as e:

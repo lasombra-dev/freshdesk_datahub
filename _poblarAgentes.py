@@ -13,8 +13,8 @@ ENDPOINT = f"https://{FRESHDESK_DOMAIN}/api/v2/agents"
 
 # Conexión a la base de datos SQL
 conn = pyodbc.connect(
-    #"DRIVER={SQL Server};"
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={SQL Server};"
+    #"DRIVER={ODBC Driver 17 for SQL Server};"
     "SERVER=ge-db-dev02.c904tqksriup.us-east-1.rds.amazonaws.com;"  # Cambia esto por tu servidor
     "DATABASE=freshdesk_datahub;"  # Cambia esto por tu base de datos
     "UID=sysdev;"
@@ -64,10 +64,10 @@ def poblar_agentes(agentes):
                 USING (SELECT ? AS ID, ? AS Nombre, ? AS Correo) AS source
                 ON target.ID = source.ID
                 WHEN MATCHED THEN
-                    UPDATE SET Nombre = source.Nombre,
+                    UPDATE SET NombreCompleto = source.Nombre,
                                Correo = source.Correo
                 WHEN NOT MATCHED THEN
-                    INSERT (ID, Nombre, Correo)
+                    INSERT (ID, NombreCompleto, Correo)
                     VALUES (source.ID, source.Nombre, source.Correo);
             """, id_agente, nombre, correo)
         except Exception as e:
