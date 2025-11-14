@@ -45,9 +45,3 @@ class DBConnection:
             conn.close()
         except Exception as e:
             print(f"Error en la prueba de conexión: {e}")
-
-# Imprimir variables cargadas
-print("DB_SERVER:", os.getenv("DB_SERVER"))
-print("DB_USER:", os.getenv("DB_USER"))
-print("DB_PASSWORD:", os.getenv("DB_PASSWORD"))
-print("DB_NAME:", os.getenv("DB_NAME"))
