@@ -1,0 +1,24 @@
+project/
+├── main.py                # Archivo principal para ejecutar todo el flujo
+├── config/
+│   ├── __init__.py        # Inicializador del módulo
+│   ├── settings.py        # Configuración general (API_KEY, dominio, DB)
+├── db/
+│   ├── __init__.py        # Inicializador del módulo
+│   ├── connection.py      # Clase para manejar la conexión a la base de datos
+│   ├── queries.py         # Consultas SQL específicas (e.g., MERGE)
+├── freshdesk/
+│   ├── __init__.py        # Inicializador del módulo
+│   ├── api.py             # Clases para manejar las llamadas a la API de Freshdesk
+│   ├── tickets.py         # Lógica para poblar Tickets (incluye CF_Empresa)
+│   ├── contacts.py        # Lógica para poblar Contactos
+│   ├── companies.py       # Lógica para poblar Empresas
+│   ├── agents.py          # Lógica para poblar Agentes
+│   ├── sla_policies.py    # Lógica para poblar SLA Policies
+│   ├── conversations.py   # Lógica para poblar Conversations
+├── utils/
+│   ├── __init__.py        # Inicializador del módulo
+│   ├── logger.py          # Clase para manejar logs
+│   ├── helpers.py         # Funciones auxiliares (e.g., sanitización, paginación)
+├── README.md              # Documentación del proyecto
+└── requirements.txt       # Dependencias del proyecto
