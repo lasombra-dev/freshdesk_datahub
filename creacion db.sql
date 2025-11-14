@@ -38,6 +38,7 @@ CREATE TABLE Tickets (
     RequesterID BIGINT,                   -- ID del contacto que creó el ticket (clave foránea)
     CompanyID BIGINT,                     -- ID de la empresa asociada al ticket (clave foránea)
     Etiquetas NVARCHAR(255),              -- Etiquetas asociadas al ticket
+    CF_Empresa NVARCHAR(100),             -- Custom field: Empresa asociada
     FOREIGN KEY (RequesterID) REFERENCES Contactos(ID), -- Relación con Contactos
     FOREIGN KEY (CompanyID) REFERENCES Empresas(ID),   -- Relación con Empresas
     FOREIGN KEY (Agente) REFERENCES Agentes(ID)        -- Relación con Agentes
