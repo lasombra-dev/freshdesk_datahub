@@ -1,47 +1,48 @@
 import pyodbc
-import os
-from dotenv import load_dotenv
-
-# Cargar variables de entorno desde el archivo .env
-load_dotenv()
+from config import settings
 
 class DBConnection:
     def __init__(self):
-        # Obtener las credenciales desde las variables de entorno
-        self.server = os.getenv("DB_SERVER")
-        self.database = os.getenv("DB_DATABASE")
-        self.username = os.getenv("DB_USERNAME")
-        self.password = os.getenv("DB_PASSWORD")
-        self.driver = os.getenv("DB_DRIVER", "{SQL Server}")  # Valor por defecto
-
-        # Cadena de conexión
         self.conn_str = (
-            f"DRIVER={self.driver};"
-            f"SERVER={self.server};"
-            f"DATABASE={self.database};"
-            f"UID={self.username};"
-            f"PWD={self.password};"
+            f"DRIVER={settings.DB_DRIVER};"
+            f"SERVER={settings.DB_SERVER};"
+            f"DATABASE={settings.DB_DATABASE};"
+            f"UID={settings.DB_USERNAME};"
+            f"PWD={settings.DB_PASSWORD};"
         )
+        self.conn = None
 
     def connect(self):
         """Establece la conexión a la base de datos."""
         try:
-            conn = pyodbc.connect(self.conn_str)
-            print("Conexión establecida exitosamente")
-            return conn
+            self.conn = pyodbc.connect(self.conn_str)
+            print("Conexión a BD establecida exitosamente")
+            return self.conn
         except Exception as e:
             print(f"Error al conectar con la base de datos: {e}")
             raise
 
+    def close(self):
+        """Cierra la conexión si está abierta."""
+        if self.conn:
+            self.conn.close()
+            print("Conexión a BD cerrada")
+
+    def __enter__(self):
+        self.connect()
+        return self.conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
     def test_connection(self):
         """Prueba la conexión realizando una consulta simple."""
         try:
-            conn = self.connect()
-            cursor = conn.cursor()
-            cursor.execute("SELECT 1 AS Test;")
-            result = cursor.fetchone()
-            if result and result.Test == 1:
-                print("Conexión probada exitosamente")
-            conn.close()
+            with self as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1 AS Test;")
+                result = cursor.fetchone()
+                if result and result.Test == 1:
+                    print("Prueba de conexión exitosa")
         except Exception as e:
             print(f"Error en la prueba de conexión: {e}")
