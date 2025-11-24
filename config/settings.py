@@ -1,15 +1,15 @@
 import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
+# Cargamos las variables del .env
 load_dotenv()
 
-# Configuración de Freshdesk
+# Datos para conectarse a Freshdesk
 FRESHDESK_DOMAIN = os.getenv("FRESHDESK_DOMAIN")
 FRESHDESK_API_KEY = os.getenv("FRESHDESK_API_KEY")
 FRESHDESK_START_DATE = os.getenv("FRESHDESK_START_DATE")
 
-# Configuración de Base de Datos
+# Datos pa la base de datos
 DB_SERVER = os.getenv("DB_SERVER")
 DB_DATABASE = os.getenv("DB_DATABASE")
 DB_USERNAME = os.getenv("DB_USERNAME")

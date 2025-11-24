@@ -4,15 +4,15 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def sync_companies(api, db_conn):
-    """Sincroniza las empresas desde Freshdesk a la base de datos."""
-    logger.info("Iniciando sincronización de Empresas...")
+    """Trae las empresas de Freshdesk y las guarda en la BD."""
+    logger.info("Empezando a traer las empresas...")
     
     companies = api.get_all_pages("companies")
     if not companies:
         logger.warning("No se encontraron empresas.")
         return
 
-    logger.info(f"Procesando {len(companies)} empresas...")
+    logger.info(f"Procesando {len(companies)} empresas, paciencia...")
     
     cursor = db_conn.cursor()
     count = 0

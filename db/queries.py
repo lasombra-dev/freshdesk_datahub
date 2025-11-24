@@ -1,4 +1,4 @@
-# Consultas SQL para MERGE
+# Las queries pa hacer el MERGE de los datos
 
 MERGE_CONTACTS = """
     MERGE Contactos AS target

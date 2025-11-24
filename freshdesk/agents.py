@@ -4,15 +4,15 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def sync_agents(api, db_conn):
-    """Sincroniza los agentes desde Freshdesk a la base de datos."""
-    logger.info("Iniciando sincronización de Agentes...")
+    """Trae los agentes de Freshdesk y los guarda en la BD."""
+    logger.info("Empezando a traer los agentes...")
     
     agents = api.get_all_pages("agents")
     if not agents:
         logger.warning("No se encontraron agentes.")
         return
 
-    logger.info(f"Procesando {len(agents)} agentes...")
+    logger.info(f"Procesando {len(agents)} agentes, vamos que se puede...")
     
     cursor = db_conn.cursor()
     count = 0

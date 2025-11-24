@@ -13,7 +13,7 @@ class DBConnection:
         self.conn = None
 
     def connect(self):
-        """Establece la conexión a la base de datos."""
+        """Se conecta a la base de datos al toque."""
         try:
             self.conn = pyodbc.connect(self.conn_str)
             print("Conexión a BD establecida exitosamente")
@@ -23,7 +23,7 @@ class DBConnection:
             raise
 
     def close(self):
-        """Cierra la conexión si está abierta."""
+        """Cierra la conexión si está abierta, pa no dejarla colgando."""
         if self.conn:
             self.conn.close()
             print("Conexión a BD cerrada")
@@ -36,7 +36,7 @@ class DBConnection:
         self.close()
 
     def test_connection(self):
-        """Prueba la conexión realizando una consulta simple."""
+        """Prueba si la conexión funca con una consulta simple."""
         try:
             with self as conn:
                 cursor = conn.cursor()

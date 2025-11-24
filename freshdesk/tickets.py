@@ -6,13 +6,13 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def sync_tickets(api, db_conn):
-    """Sincroniza los tickets desde Freshdesk a la base de datos."""
-    logger.info("Iniciando sincronización de Tickets...")
+    """Trae los tickets de Freshdesk y los guarda en la BD."""
+    logger.info("Empezando a traer los tickets...")
     
     start_date = settings.FRESHDESK_START_DATE
     current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     
-    # Construir query de búsqueda
+    # Armando la query para buscar...
     query = f"created_at:>'{start_date}' AND created_at:<'{current_date}'"
     
     tickets = api.search_tickets(query)
@@ -20,7 +20,7 @@ def sync_tickets(api, db_conn):
         logger.warning("No se encontraron tickets.")
         return
 
-    logger.info(f"Procesando {len(tickets)} tickets...")
+    logger.info(f"Procesando {len(tickets)} tickets, esto puede tardar...")
     
     cursor = db_conn.cursor()
     count = 0

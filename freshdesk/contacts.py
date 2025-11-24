@@ -4,15 +4,15 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def sync_contacts(api, db_conn):
-    """Sincroniza los contactos desde Freshdesk a la base de datos."""
-    logger.info("Iniciando sincronización de Contactos...")
+    """Trae los contactos de Freshdesk y los guarda en la BD."""
+    logger.info("Empezando a traer los contactos...")
     
     contacts = api.get_all_pages("contacts")
     if not contacts:
         logger.warning("No se encontraron contactos.")
         return
 
-    logger.info(f"Procesando {len(contacts)} contactos...")
+    logger.info(f"Procesando {len(contacts)} contactos, aguanten...")
     
     cursor = db_conn.cursor()
     count = 0

@@ -9,14 +9,14 @@ from utils.logger import setup_logger
 logger = setup_logger(__name__)
 
 def main():
-    logger.info("Iniciando proceso de sincronización Freshdesk Datahub...")
+    logger.info("Empezando el mambo de la sincronización Freshdesk Datahub...")
     
-    # Inicializar conexión a BD
+    # Conectando a la base de datos...
     db = DBConnection()
     
     try:
         with db as conn:
-            # Inicializar API
+            # Su charchazo a la API...
             api = FreshdeskAPI()
             
             # Ejecutar sincronizaciones
@@ -28,7 +28,7 @@ def main():
             logger.info("¡Proceso de sincronización completado exitosamente!")
             
     except Exception as e:
-        logger.critical(f"El proceso falló: {e}")
+        logger.critical(f"Se nos cayó el sistema: {e}")
 
 if __name__ == "__main__":
     main()
