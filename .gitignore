@@ -1,2 +1,5 @@
 # Ignorar el archivo .env (credenciales)
 .env
+__pycache__/
+*.pyc
+*.pyo
